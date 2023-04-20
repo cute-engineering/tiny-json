@@ -4,12 +4,12 @@
 
 #include "json.h"
 
-void *json_realloc(void *ptr, size_t size)
+void *_json_realloc(void *ptr, size_t size)
 {
     return realloc(ptr, size);
 }
 
-void json_free(void *ptr, __attribute__((unused)) size_t size)
+void _json_free(void *ptr, __attribute__((unused)) size_t size)
 {
     free(ptr);
 }
@@ -38,5 +38,5 @@ int main(void)
         printf("qux[%lu] = %lu\n", i, qux.array.buf[i].number);
     }
 
-    vec_free(&obj.array);
+    json_free(&obj);
 }

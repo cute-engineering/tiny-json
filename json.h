@@ -8,8 +8,8 @@ typedef struct json_t json_t;
 
 /* --- Allocation ------------------------------------------------------ */
 
-void *json_realloc(void *ptr, size_t size);
-void json_free(void *ptr, size_t size);
+void *_json_realloc(void *ptr, size_t size);
+void _json_free(void *ptr, size_t size);
 
 /* --- Reader ---------------------------------------------------------- */
 
@@ -21,6 +21,12 @@ typedef struct
 } json_reader_t;
 
 json_reader_t json_init(char const *buf, size_t len);
+
+#define json_arr_foreach(o, r)                                     \
+    if ((o)->array.len > 0)                                        \
+        for (size_t i = 0;                                         \
+             i < (o)->array.len && (((r) = (o)->array.buf[i]), 1); \
+             ++i)
 
 /* --- Vec ------------------------------------------------------------- */
 
@@ -40,27 +46,27 @@ typedef struct json_obj_t json_obj_t;
 
 typedef enum
 {
+    JSON_KEY_NOT_FOUND,
+    JSON_MISSING_COLON,
+    JSON_MISSING_QUOTE,
     JSON_MISSING_RBRACE,
     JSON_MISSING_RBRACKET,
-    JSON_MISSING_QUOTE,
-    JSON_MISSING_COLON,
-    JSON_NOT_AN_OBJECT,
     JSON_NOT_A_KEY,
-    JSON_KEY_NOT_FOUND,
+    JSON_NOT_AN_OBJECT,
 
     JSON_UNIMPLEMENTED
 } json_error_t;
 
 typedef enum
 {
-    JSON_NULL,
-    JSON_OBJECT,
     JSON_ARRAY,
-    JSON_STRING,
-    JSON_NUMBER,
-    JSON_KEY,
     JSON_BOOL,
-    JSON_ERROR
+    JSON_ERROR,
+    JSON_KEY,
+    JSON_NULL,
+    JSON_NUMBER,
+    JSON_OBJECT,
+    JSON_STRING,
 } json_type_t;
 
 typedef struct json_t
@@ -86,3 +92,4 @@ json_t json_parse(json_reader_t *r);
 /* --- Utils ------------------------------------------------------ */
 
 json_t json_get(json_t obj, char const *key);
+void json_free(json_t *self);

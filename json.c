@@ -44,6 +44,47 @@ json_t json_get(json_t obj, char const *key)
     return json_raise(JSON_KEY_NOT_FOUND);
 }
 
+void json_free(json_t *self)
+{
+    if (self == NULL)
+    {
+        return;
+    }
+
+    switch (self->type)
+    {
+    case JSON_OBJECT:
+    case JSON_ARRAY:
+    {
+        for (size_t i = 0; i < self->array.len; i++)
+        {
+            json_free(&self->array.buf[i]);
+        }
+
+        _json_free(self->array.buf, self->array.cap * sizeof(json_t));
+
+        self->array.buf = NULL;
+        self->array.len = 0;
+        self->array.cap = 0;
+        break;
+    }
+
+    case JSON_BOOL:
+    case JSON_ERROR:
+    case JSON_NULL:
+    case JSON_NUMBER:
+    {
+        break;
+    }
+
+    case JSON_STRING:
+    case JSON_KEY:
+    {
+        _json_free((void *)self->string, strlen(self->string) + 1);
+    }
+    }
+}
+
 /* --- Reader ---------------------------------------------------------- */
 
 static bool reader_eof(json_reader_t *r)
@@ -107,7 +148,7 @@ json_reader_t json_init(char const *buf, size_t len)
 
 static json_t json_str(char const *str, size_t len)
 {
-    char *result = json_realloc(NULL, len + 1);
+    char *result = _json_realloc(NULL, len + 1);
     memcpy(result, str, len);
     result[len] = '\0';
 
@@ -142,7 +183,7 @@ static json_t json_parse_str(json_reader_t *r)
 
 static json_t json_parse_object(json_reader_t *r)
 {
-    json_vec_t obj;
+    json_vec_t obj = {0};
     reader_skip(r, '{');
 
     while (!reader_eof(r))
@@ -195,7 +236,7 @@ static json_t json_parse_number(json_reader_t *r)
 
 json_t json_parse_array(json_reader_t *r)
 {
-    json_vec_t arr;
+    json_vec_t arr = {0};
 
     reader_skip(r, '[');
 
@@ -253,34 +294,12 @@ json_t json_parse(json_reader_t *r)
 
 void vec_append(json_vec_t *self, json_t obj)
 {
-    if (self->len + 1 > self->cap)
+    if (self->len == self->cap)
     {
         size_t n = (self->cap == 0) ? 1 : self->cap << 1;
-        self->buf = json_realloc(self->buf, n * sizeof(json_t));
+        self->buf = _json_realloc(self->buf, n * sizeof(json_t));
         self->cap = n;
     }
 
     self->buf[self->len++] = obj;
-}
-
-void vec_free(json_vec_t *self)
-{
-    for (size_t i = 0; i < self->len; i++)
-    {
-        if (self->buf[i].type == JSON_OBJECT || self->buf[i].type == JSON_ARRAY)
-        {
-            vec_free(&self->buf[i].array);
-        }
-
-        if (self->buf[i].type == JSON_STRING || self->buf[i].type == JSON_KEY)
-        {
-            json_free((void *)self->buf[i].string, strlen(self->buf[i].string) + 1);
-        }
-    }
-
-    json_free(self->buf, self->cap * sizeof(json_t));
-
-    self->buf = NULL;
-    self->len = 0;
-    self->cap = 0;
 }
