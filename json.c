@@ -211,10 +211,17 @@ static json_t json_parse_object(json_reader_t *r)
         vec_append(&obj, key);
         vec_append(&obj, value);
 
+        reader_skip_ws(r);
+
         if (!reader_skip(r, ','))
         {
             break;
         }
+    }
+
+    if (!reader_skip(r, '}'))
+    {
+        return json_raise(JSON_MISSING_LBRACE);
     }
 
     return (json_t){.type = JSON_OBJECT, .array = obj};
@@ -240,16 +247,28 @@ json_t json_parse_array(json_reader_t *r)
 
     reader_skip(r, '[');
 
-    while (reader_peek(r) != ']' && !reader_eof(r))
+    while (!reader_eof(r))
     {
         reader_skip_ws(r);
+
+        if (reader_peek(r) == ']')
+        {
+            break;
+        }
+
         json_t value = json_parse(r);
         vec_append(&arr, value);
 
+        reader_skip_ws(r);
         if (!reader_skip(r, ','))
         {
             break;
         }
+    }
+
+    if (!reader_skip(r, ']'))
+    {
+        return json_raise(JSON_MISSING_LBRACKET);
     }
 
     return (json_t){.type = JSON_ARRAY, .array = arr};
