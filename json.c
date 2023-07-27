@@ -208,8 +208,8 @@ static json_t json_parse_object(json_reader_t *r)
 
         json_t value = json_parse(r);
 
-        vec_append(&obj, key);
-        vec_append(&obj, value);
+        json_vec_append(&obj, key);
+        json_vec_append(&obj, value);
 
         reader_skip_ws(r);
 
@@ -257,7 +257,7 @@ json_t json_parse_array(json_reader_t *r)
         }
 
         json_t value = json_parse(r);
-        vec_append(&arr, value);
+        json_vec_append(&arr, value);
 
         reader_skip_ws(r);
         if (!reader_skip(r, ','))
@@ -311,7 +311,7 @@ json_t json_parse(json_reader_t *r)
 }
 /* --- Vec ------------------------------------------------------------- */
 
-void vec_append(json_vec_t *self, json_t obj)
+void json_vec_append(json_vec_t *self, json_t obj)
 {
     if (self->len == self->cap)
     {

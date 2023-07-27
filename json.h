@@ -37,8 +37,8 @@ typedef struct
     size_t cap;
 } json_vec_t;
 
-void vec_append(json_vec_t *self, json_t obj);
-void vec_free(json_vec_t *self);
+void json_vec_append(json_vec_t *self, json_t obj);
+void json_vec_free(json_vec_t *self);
 
 /* --- Parser ---------------------------------------------------------- */
 
