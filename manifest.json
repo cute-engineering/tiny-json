@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schemas.cute.engineering/latest/cutekit.manifest.project",
+    "$schema": "https://schemas.cute.engineering/stable/cutekit.manifest.component.v1",
     "id": "tiny-json",
     "type": "lib",
     "description": "A simple json library for hobby operating system"

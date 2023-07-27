@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schemas.cute.engineering/latest/osdk.manifest.component",
+    "$schema": "https://schemas.cute.engineering/stable/cutekit.manifest.component.v1",
     "id": "tiny-json-test",
     "type": "exe",
     "description": ""
